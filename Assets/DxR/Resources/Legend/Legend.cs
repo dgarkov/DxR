@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using DxR;
+using Microsoft.MixedReality.Toolkit.Utilities;
 using SimpleJSON;
 using UnityEngine;
 
@@ -133,9 +134,9 @@ public class Legend : MonoBehaviour {
 
         colorLine.transform.parent = gameObject.transform;
 
-        gameObject.GetComponent<HoloToolkit.Unity.Collections.ObjectCollection>().Rows = 3;             // TODO: Update this if no ticks are shown.
-        gameObject.GetComponent<HoloToolkit.Unity.Collections.ObjectCollection>().CellHeight = 0.08f;
-        gameObject.GetComponent<HoloToolkit.Unity.Collections.ObjectCollection>().UpdateCollection();
+        gameObject.GetComponent<GridObjectCollection>().Rows = 3;             // TODO: Update this if no ticks are shown.
+        gameObject.GetComponent<GridObjectCollection>().CellHeight = 0.08f;
+        gameObject.GetComponent<GridObjectCollection>().UpdateCollection();
     }
 
     private void ConstructSymbols(JSONNode legendSpecs, ref ChannelEncoding channelEncoding, GameObject markPrefab)
@@ -167,12 +168,12 @@ public class Legend : MonoBehaviour {
                 legendValueInstance.GetComponent<LegendValue>().SetMark(markInstance);
 
                 // Update the collection.
-                legendValueInstance.GetComponent<HoloToolkit.Unity.Collections.ObjectCollection>().UpdateCollection();
+                legendValueInstance.GetComponent<GridObjectCollection>().UpdateCollection();
             }
 
-            gameObject.GetComponent<HoloToolkit.Unity.Collections.ObjectCollection>().Rows = channelEncoding.scale.domain.Count + 1;
-            gameObject.GetComponent<HoloToolkit.Unity.Collections.ObjectCollection>().CellHeight = 0.05f;   // TODO: Set to height of each legendValue.
-            gameObject.GetComponent<HoloToolkit.Unity.Collections.ObjectCollection>().UpdateCollection();
+            gameObject.GetComponent<GridObjectCollection>().Rows = channelEncoding.scale.domain.Count + 1;
+            gameObject.GetComponent<GridObjectCollection>().CellHeight = 0.05f;   // TODO: Set to height of each legendValue.
+            gameObject.GetComponent<GridObjectCollection>().UpdateCollection();
         } else if(channelEncoding.channel == "opacity")
         {
             // TODO:

@@ -1,0 +1,12 @@
+fileFormatVersion: 2
+guid: f7349f11a5c36f442a93d8274684f286
+ScriptedImporter:
+  fileIDToRecycleName:
+    11400000: DxR-Unity.Dependencies.msb4u
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: 11500000, guid: 0e4dca1acba66fd478b3854f09a32ec7, type: 3}
+  buildEngine: 0
+  profiles: []

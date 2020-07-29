@@ -111,13 +111,15 @@ namespace DxR
         private Quaternion mCachedRotation;
 
         GameObject GazePoint;
-        int current_selection=1;
+        int current_selection = 1;
 
         protected override void Awake()
         {
             base.Awake();
 
-            GazePoint = GameObject.Find("DefaultCursor");
+            GazePoint = GameObject.Find("DefaultCursor(Clone)");
+            if (!GazePoint) //VR?
+                GazePoint = GameObject.Find("DefaultControllerPointer(Clone)");
 
             if (first_Knob != null)
             {
@@ -200,22 +202,22 @@ namespace DxR
             }
 
             base.ManipulationUpdate(startGesturePosition, currentGesturePosition, startHeadOrigin, startHeadRay, gestureState);
-            
+
             // get the current delta
-            float delta =  (CurrentDistance > 0) ? CurrentPercentage : -CurrentPercentage;
-            
+            float delta = (CurrentDistance > 0) ? CurrentPercentage : -CurrentPercentage;
+
             // combine the delta with the current slider position so the slider does not start over every time
-            if(current_selection==1)mDeltaValue1 = Mathf.Clamp01(delta + mCachedValue1);
+            if (current_selection == 1) mDeltaValue1 = Mathf.Clamp01(delta + mCachedValue1);
             else mDeltaValue2 = Mathf.Clamp01(delta + mCachedValue2);
 
             if (!Centered)
             {
-                if(current_selection==1)SliderValue1 = mDeltaValue1 * mValueSpan + MinSliderValue;
+                if (current_selection == 1) SliderValue1 = mDeltaValue1 * mValueSpan + MinSliderValue;
                 else SliderValue2 = mDeltaValue2 * mValueSpan + +MinSliderValue;
             }
             else
             {
-                if(current_selection==1)SliderValue1 = mDeltaValue1 * mValueSpan * 2 - mValueSpan + MinSliderValue;
+                if (current_selection == 1) SliderValue1 = mDeltaValue1 * mValueSpan * 2 - mValueSpan + MinSliderValue;
                 else SliderValue2 = mDeltaValue2 * mValueSpan * 2 - mValueSpan + MinSliderValue;
             }
 
@@ -256,18 +258,18 @@ namespace DxR
             }
             AutoSliderTimerCounter = 0;
         }
-		
+
         /// <summary>
         /// set the distance of the slider
         /// </summary>
         /// <param name="min"></param>
         /// <param name="max"></param>
-		public void SetSpan(float min, float max)
-		{
-			mValueSpan = max - min;
-			MaxSliderValue = max;
-			MinSliderValue = min;
-		}
+        public void SetSpan(float min, float max)
+        {
+            mValueSpan = max - min;
+            MaxSliderValue = max;
+            MinSliderValue = min;
+        }
 
         /// <summary>
         /// override the slider value
@@ -282,22 +284,22 @@ namespace DxR
             }
 
             mSliderValue1 = Mathf.Clamp(value, MinSliderValue, MaxSliderValue);
-            mDeltaValue1 = (SliderValue1-MinSliderValue) / (MaxSliderValue-MinSliderValue);
+            mDeltaValue1 = (SliderValue1 - MinSliderValue) / (MaxSliderValue - MinSliderValue);
             UpdateVisuals();
             mCachedValue1 = mDeltaValue1;
 
         }
 
         public void SetSliderValue2(float value)
-		{
-			if(GestureStarted)
-			{
-				return;
-			}
-			
-			mSliderValue2 = Mathf.Clamp(value, MinSliderValue, MaxSliderValue);
-			mDeltaValue2 = (SliderValue2-MinSliderValue) / (MaxSliderValue-MinSliderValue);
-			UpdateVisuals();
+        {
+            if (GestureStarted)
+            {
+                return;
+            }
+
+            mSliderValue2 = Mathf.Clamp(value, MinSliderValue, MaxSliderValue);
+            mDeltaValue2 = (SliderValue2 - MinSliderValue) / (MaxSliderValue - MinSliderValue);
+            UpdateVisuals();
             mCachedValue2 = mDeltaValue2;
 
         }
@@ -328,13 +330,13 @@ namespace DxR
             // set the fill scale and position
             if (SliderFill != null)
             {
-                
+
                 Vector3 scale = mSliderFillScale;
-                if(mDeltaValue2> mDeltaValue1)scale.x = mSliderFillScale.x * (mDeltaValue2-mDeltaValue1);
+                if (mDeltaValue2 > mDeltaValue1) scale.x = mSliderFillScale.x * (mDeltaValue2 - mDeltaValue1);
                 else scale.x = mSliderFillScale.x * (mDeltaValue1 - mDeltaValue2);
 
                 Vector3 position;
-                if(SliderValue2 > SliderValue1) position=Vector3.left * (mSliderWidth * 0.5f - mSliderWidth * (mDeltaValue2 + mDeltaValue1) * 0.5f); // left justified;
+                if (SliderValue2 > SliderValue1) position = Vector3.left * (mSliderWidth * 0.5f - mSliderWidth * (mDeltaValue2 + mDeltaValue1) * 0.5f); // left justified;
                 else position = Vector3.left * (mSliderWidth * 0.5f - mSliderWidth * (mDeltaValue1 + mDeltaValue2) * 0.5f); // left justified;
 
                 if (Centered)

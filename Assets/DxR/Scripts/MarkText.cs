@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.MixedReality.Toolkit.UI;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -48,10 +49,10 @@ namespace DxR
         {
             if(value == "True")
             {
-                gameObject.GetComponent<HoloToolkit.Unity.Billboard>().enabled = true;
+                gameObject.GetComponent<Billboard>().enabled = true;
             } else
             {
-                gameObject.GetComponent<HoloToolkit.Unity.Billboard>().enabled = false;
+                gameObject.GetComponent<Billboard>().enabled = false;
             }
         }
 

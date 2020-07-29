@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Microsoft.MixedReality.Toolkit.Utilities;
 using SimpleJSON;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -217,7 +218,7 @@ namespace DxR
 
             toggleFilterInstance.name = interactionSpecs["field"];
 
-            HoloToolkit.Unity.Collections.ObjectCollection collection = toggleFilterInstance.GetComponent<HoloToolkit.Unity.Collections.ObjectCollection>();
+            GridObjectCollection collection = toggleFilterInstance.GetComponent<GridObjectCollection>();
             if (collection == null) return;
 
             // Use the provided domain of the data field to create check boxes.

@@ -7,6 +7,8 @@ using SimpleJSON;
 using UnityEngine.UI;
 using System;
 using UnityEngine.EventSystems;
+using Microsoft.MixedReality.Toolkit.UI;
+using UnityEngine.Events;
 
 namespace DxR
 {
@@ -21,7 +23,7 @@ namespace DxR
         JSONNode guiVisSpecs = null;
         Dropdown dataDropdown = null;
         Dropdown markDropdown = null;
-        
+
         Transform addChannelButtonTransform = null;
         GameObject channelGUIPrefab = null;
 
@@ -29,7 +31,7 @@ namespace DxR
         GameObject interactionGUIPrefab = null;
 
         List<string> dataFieldTypeDropdownOptions;
-        
+
         // Use this for initialization
         void Start()
         {
@@ -44,29 +46,35 @@ namespace DxR
         public void Init(Vis targetVisInstance)
         {
             targetVis = targetVisInstance;
-            
+
             dataFieldTypeDropdownOptions = new List<string> { "quantitative", "nominal", "ordinal", "temporal" };
 
             Transform dataDropdownTransform = gameObject.transform.Find("DataDropdown");
-            dataDropdown = dataDropdownTransform.gameObject.GetComponent<Dropdown>();
-            dataDropdown.onValueChanged.AddListener(delegate {
+            dataDropdown = dataDropdownTransform.GetComponent<Dropdown>();
+            dataDropdown.onValueChanged.AddListener(delegate
+            {
                 OnDataDropdownValueChanged(dataDropdown);
             });
+            Interactable dataInteractable = dataDropdownTransform.GetComponent<Interactable>();
+            dataInteractable.OnClick.AddListener(delegate { OnDropdownClick(dataDropdown); });
 
             Transform marksDropdownTransform = gameObject.transform.Find("MarkDropdown");
-            markDropdown = marksDropdownTransform.gameObject.GetComponent<Dropdown>();
-            markDropdown.onValueChanged.AddListener(delegate {
+            markDropdown = marksDropdownTransform.GetComponent<Dropdown>();
+            markDropdown.onValueChanged.AddListener(delegate
+            {
                 OnMarkDropdownValueChanged(markDropdown);
             });
+            Interactable markInteractable = marksDropdownTransform.GetComponent<Interactable>();
+            markInteractable.OnClick.AddListener(delegate { OnDropdownClick(markDropdown); });
 
-            Button btn = gameObject.transform.Find("UpdateButton").GetComponent<Button>();
-            btn.onClick.AddListener(CallUpdateVisSpecsFromGUISpecs);
+            Interactable btn = gameObject.transform.Find("UpdateButton").GetComponent<Interactable>();
+            btn.OnClick.AddListener(CallUpdateVisSpecsFromGUISpecs);
 
             channelGUIPrefab = Resources.Load("GUI/ChannelGUI") as GameObject;
 
             addChannelButtonTransform = gameObject.transform.Find("ChannelList/Viewport/ChannelListContent/AddChannelButton");
-            Button addChannelBtn = addChannelButtonTransform.GetComponent<Button>();
-            addChannelBtn.onClick.AddListener(AddEmptyChannelGUICallback);
+            Interactable addChannelBtn = addChannelButtonTransform.GetComponent<Interactable>();
+            addChannelBtn.OnClick.AddListener(AddEmptyChannelGUICallback);
 
 #if USE_INTERACTION_GUI
             
@@ -82,23 +90,23 @@ namespace DxR
 
         private void InitInteractiveButtons()
         {
-            Button resetBtn = gameObject.transform.Find("ResetButton").GetComponent<Button>();
-            resetBtn.onClick.AddListener(ResetCallback);
+            Interactable resetBtn = gameObject.transform.Find("ResetButton").GetComponent<Interactable>();
+            resetBtn.OnClick.AddListener(ResetCallback);
 
-            Button zoomInBtn = gameObject.transform.Find("ZoomInButton").GetComponent<Button>();
-            zoomInBtn.onClick.AddListener(ZoomInCallback);
+            Interactable zoomInBtn = gameObject.transform.Find("ZoomInButton").GetComponent<Interactable>();
+            zoomInBtn.OnClick.AddListener(ZoomInCallback);
 
-            Button zoomOutBtn = gameObject.transform.Find("ZoomOutButton").GetComponent<Button>();
-            zoomOutBtn.onClick.AddListener(ZoomOutCallback);
+            Interactable zoomOutBtn = gameObject.transform.Find("ZoomOutButton").GetComponent<Interactable>();
+            zoomOutBtn.OnClick.AddListener(ZoomOutCallback);
 
-            Button rotateXBtn = gameObject.transform.Find("RotateXButton").GetComponent<Button>();
-            rotateXBtn.onClick.AddListener(RotateXCallback);
+            Interactable rotateXBtn = gameObject.transform.Find("RotateXButton").GetComponent<Interactable>();
+            rotateXBtn.OnClick.AddListener(RotateXCallback);
 
-            Button rotateYBtn = gameObject.transform.Find("RotateYButton").GetComponent<Button>();
-            rotateYBtn.onClick.AddListener(RotateYCallback);
+            Interactable rotateYBtn = gameObject.transform.Find("RotateYButton").GetComponent<Interactable>();
+            rotateYBtn.OnClick.AddListener(RotateYCallback);
 
-            Button rotateZBtn = gameObject.transform.Find("RotateZButton").GetComponent<Button>();
-            rotateZBtn.onClick.AddListener(RotateZCallback);
+            Interactable rotateZBtn = gameObject.transform.Find("RotateZButton").GetComponent<Interactable>();
+            rotateZBtn.OnClick.AddListener(RotateZCallback);
         }
 
         public void RotateXCallback()
@@ -135,7 +143,7 @@ namespace DxR
 
         public void ZoomInCallback()
         {
-            if(targetVis != null)
+            if (targetVis != null)
             {
                 targetVis.Rescale(1.10f);
             }
@@ -146,6 +154,37 @@ namespace DxR
             if (targetVis != null)
             {
                 targetVis.Rescale(0.9f);
+            }
+        }
+
+        private Dictionary<string, byte> dropdownState = new Dictionary<string, byte>(); // showing 1, hidden 0
+        /// <summary>
+        /// Shows and hides the list of items of a dropdown UnityUI component. Handles clicks on items.
+        /// </summary>
+        /// <param name="dropdown"></param>
+        public void OnDropdownClick(Dropdown dropdown)
+        {
+            if (dropdownState.ContainsKey(dropdown.name) && dropdownState[dropdown.name] == 1)
+            {
+                dropdownState[dropdown.name] = 0;
+                dropdown.Hide();
+            }
+            else
+            {
+                dropdownState[dropdown.name] = 1;
+                dropdown.Show();
+                int i = 0;
+                foreach (var item in dropdown.GetComponentsInChildren<Toggle>())
+                {
+                    int value = i++;
+                    item.gameObject.AddComponent<Interactable>().OnClick.AddListener(() =>
+                    {
+                        dropdown.value = value;
+                        foreach (var _item in dropdown.GetComponentsInChildren<Toggle>())
+                            item.isOn = false;
+                        item.isOn = true;
+                    });
+                }
             }
         }
 
@@ -163,14 +202,14 @@ namespace DxR
             UpdateGUIDataDropdownList(targetVis.GetDataList());
             UpdateGUIMarksDropdownList(marksList);
 
-            if(!marksList.Contains(guiVisSpecs["mark"].Value.ToString()))
+            if (!marksList.Contains(guiVisSpecs["mark"].Value.ToString()))
             {
                 throw new Exception("Cannot find mark name in DxR/Resources/Marks/marks.json");
             }
 
             // Update the dropdown values:
             UpdateDataDropdownValue(guiVisSpecs["data"]["url"].Value);
-UpdateMarkDropdownValue(guiVisSpecs["mark"].Value);
+            UpdateMarkDropdownValue(guiVisSpecs["mark"].Value);
 
             // Update GUI for channels:
             UpdateGUIChannelsList(guiVisSpecs);
@@ -189,12 +228,12 @@ UpdateMarkDropdownValue(guiVisSpecs["mark"].Value);
 
             // Go through each channel encoding in the specs and add GUI for each:
             JSONObject channelEncodings = guiVisSpecs["encoding"].AsObject;
-            if(channelEncodings != null)
+            if (channelEncodings != null)
             {
                 foreach (KeyValuePair<string, JSONNode> kvp in channelEncodings.AsObject)
                 {
                     string channelName = kvp.Key;
-                    if(guiVisSpecs["encoding"][channelName]["value"] == null && 
+                    if (guiVisSpecs["encoding"][channelName]["value"] == null &&
                         IsChannelInMarksChannelList(guiVisSpecs["mark"].Value, channelName))
                     {
                         AddChannelGUI(channelName, kvp.Value.AsObject);
@@ -299,7 +338,7 @@ UpdateMarkDropdownValue(guiVisSpecs["mark"].Value);
         private void RemoveAllChannelGUIs()
         {
             Transform channelListContent = gameObject.transform.Find("ChannelList/Viewport/ChannelListContent");
-            for(int i = 0; i < channelListContent.childCount - 1; i++)
+            for (int i = 0; i < channelListContent.childCount - 1; i++)
             {
                 GameObject.Destroy(channelListContent.GetChild(i).gameObject);
             }
@@ -335,7 +374,7 @@ UpdateMarkDropdownValue(guiVisSpecs["mark"].Value);
             {
                 GameObject channelGUI = channelListContent.GetChild(i).gameObject;
                 JSONObject channelSpecs = new JSONObject();
-                
+
                 Dropdown dropdown = channelGUI.transform.Find("DataFieldDropdown").GetComponent<Dropdown>();
                 string dataField = dropdown.options[dropdown.value].text;
                 channelSpecs.Add("field", new JSONString(dataField));
@@ -398,7 +437,7 @@ UpdateMarkDropdownValue(guiVisSpecs["mark"].Value);
             {
                 Debug.Log("Updated specs " + curValue);
 
-//                UpdateGUIChannelsList(guiVisSpecs);
+                //                UpdateGUIChannelsList(guiVisSpecs);
             }
         }
 
@@ -435,7 +474,7 @@ UpdateMarkDropdownValue(guiVisSpecs["mark"].Value);
 
         private void UpdateInteraction(GameObject interactionGUI)
         {
-            
+
         }
 
         public void OnInteractionGUIInteractionTypeDropdownValueChanged(Dropdown changed, GameObject interactionGUI)
@@ -478,17 +517,17 @@ UpdateMarkDropdownValue(guiVisSpecs["mark"].Value);
 
                 // Keep channel field names if they exist in the data
                 // and set to undefined if not, so user can use specs as template for new data.
-                
+
                 List<string> newDataFields = GetDataFieldsList();
                 Transform channelListContent = gameObject.transform.Find("ChannelList/Viewport/ChannelListContent");
                 for (int i = 0; i < channelListContent.childCount - 1; i++)
                 {
                     GameObject channelGUI = channelListContent.GetChild(i).gameObject;
-                    
+
                     Dropdown dropdown = channelGUI.transform.Find("ChannelDropdown").GetComponent<Dropdown>();
                     string channel = dropdown.options[dropdown.value].text;
 
-                    if(!newDataFields.Contains(channel))
+                    if (!newDataFields.Contains(channel))
                     {
                         dropdown = channelGUI.transform.Find("DataFieldDropdown").GetComponent<Dropdown>();
                         UpdateChannelGUIDataFieldDropdownValue("undefined", ref channelGUI);
@@ -509,13 +548,13 @@ UpdateMarkDropdownValue(guiVisSpecs["mark"].Value);
             if (prevValue != curValue)
             {
                 guiVisSpecs["mark"] = curValue;
-/*
-                // Reset channels!
-                // TODO: Only reset parts of the spec.
-                guiVisSpecs["encoding"] = null;
+                /*
+                                // Reset channels!
+                                // TODO: Only reset parts of the spec.
+                                guiVisSpecs["encoding"] = null;
 
-                Debug.Log("Updated specs " + guiVisSpecs["encoding"].ToString());
-                */
+                                Debug.Log("Updated specs " + guiVisSpecs["encoding"].ToString());
+                                */
                 UpdateGUIChannelsList(guiVisSpecs);
             }
         }
@@ -568,60 +607,75 @@ UpdateMarkDropdownValue(guiVisSpecs["mark"].Value);
         private void AddChannelGUIDeleteCallback(ref GameObject channelGUI)
         {
             Transform deleteChannelObject = channelGUI.transform.Find("DeleteChannelButton");
-            Button btn = deleteChannelObject.gameObject.GetComponent<Button>();
-            btn.onClick.AddListener(DeleteParentOfClickedObjectCallback);
+            Interactable btn = deleteChannelObject.gameObject.GetComponent<Interactable>();
+            btn.OnClick.AddListener(DeleteParentOfClickedObjectCallback);
         }
 
         private void AddInteractionGUIDeleteCallback(ref GameObject interactionGUI)
         {
             Transform deleteInteractionObject = interactionGUI.transform.Find("DeleteInteractionButton");
-            Button btn = deleteInteractionObject.gameObject.GetComponent<Button>();
-            btn.onClick.AddListener(DeleteParentOfClickedObjectCallback);
+            Interactable btn = deleteInteractionObject.gameObject.GetComponent<Interactable>();
+            btn.OnClick.AddListener(DeleteParentOfClickedObjectCallback);
         }
 
         private void AddChannelGUIChannelCallback(ref GameObject channelGUI)
         {
             Transform dropdownObject = channelGUI.transform.Find("ChannelDropdown");
             Dropdown dropdown = dropdownObject.gameObject.GetComponent<Dropdown>();
-            dropdown.onValueChanged.AddListener(delegate {
+            dropdown.onValueChanged.AddListener(delegate
+            {
                 OnChannelGUIChannelDropdownValueChanged(dropdown);
             });
+            Interactable objInteractable = dropdownObject.GetComponent<Interactable>();
+            objInteractable.OnClick.AddListener(delegate { OnDropdownClick(dropdown); });
         }
 
         private void AddChannelGUIDataFieldCallback(ref GameObject channelGUI)
         {
             Transform dropdownObject = channelGUI.transform.Find("DataFieldDropdown");
             Dropdown dropdown = dropdownObject.gameObject.GetComponent<Dropdown>();
-            dropdown.onValueChanged.AddListener(delegate {
+            dropdown.onValueChanged.AddListener(delegate
+            {
                 OnChannelGUIDataFieldDropdownValueChanged(dropdown);
             });
+            Interactable objInteractable = dropdownObject.GetComponent<Interactable>();
+            objInteractable.OnClick.AddListener(delegate { OnDropdownClick(dropdown); });
         }
 
         private void AddInteractionGUIDataFieldCallback(GameObject interactionGUI)
         {
             Transform dropdownObject = interactionGUI.transform.Find("DataFieldDropdown");
             Dropdown dropdown = dropdownObject.gameObject.GetComponent<Dropdown>();
-            dropdown.onValueChanged.AddListener(delegate {
+            dropdown.onValueChanged.AddListener(delegate
+            {
                 OnInteractionGUIDataFieldDropdownValueChanged(dropdown, interactionGUI);
             });
+            Interactable objInteractable = dropdownObject.GetComponent<Interactable>();
+            objInteractable.OnClick.AddListener(delegate { OnDropdownClick(dropdown); });
         }
 
         private void AddInteractionGUIInteractionTypeCallback(GameObject interactionGUI)
         {
             Transform dropdownObject = interactionGUI.transform.Find("InteractionTypeDropdown");
             Dropdown dropdown = dropdownObject.gameObject.GetComponent<Dropdown>();
-            dropdown.onValueChanged.AddListener(delegate {
+            dropdown.onValueChanged.AddListener(delegate
+            {
                 OnInteractionGUIInteractionTypeDropdownValueChanged(dropdown, interactionGUI);
             });
+            Interactable objInteractable = dropdownObject.GetComponent<Interactable>();
+            objInteractable.OnClick.AddListener(delegate { OnDropdownClick(dropdown); });
         }
 
         private void AddChannelGUIDataFieldTypeCallback(ref GameObject channelGUI)
         {
             Transform dropdownObject = channelGUI.transform.Find("DataFieldTypeDropdown");
             Dropdown dropdown = dropdownObject.gameObject.GetComponent<Dropdown>();
-            dropdown.onValueChanged.AddListener(delegate {
+            dropdown.onValueChanged.AddListener(delegate
+            {
                 OnChannelGUIDataFieldTypeDropdownValueChanged(dropdown);
             });
+            Interactable objInteractable = dropdownObject.GetComponent<Interactable>();
+            objInteractable.OnClick.AddListener(delegate { OnDropdownClick(dropdown); });
         }
 
         private void UpdateChannelsListOptions(ref GameObject channelGUI)
@@ -637,7 +691,7 @@ UpdateMarkDropdownValue(guiVisSpecs["mark"].Value);
             //
             GameObject.Destroy(EventSystem.current.currentSelectedGameObject.transform.parent.gameObject);
         }
-        
+
         public List<string> GetChannelDropdownOptions()
         {
             return targetVis.GetChannelsList(markDropdown.options[markDropdown.value].text);
@@ -653,10 +707,11 @@ UpdateMarkDropdownValue(guiVisSpecs["mark"].Value);
         public List<string> GetDataFieldDropdownOptions()
         {
             List<string> fieldsListOptions = new List<string> { DxR.Vis.UNDEFINED };
-            if(guiVisSpecs["data"]["url"].Value == "inline")
+            if (guiVisSpecs["data"]["url"].Value == "inline")
             {
                 fieldsListOptions.AddRange(targetVis.GetDataFieldsListFromValues(guiVisSpecs["data"]["values"]));
-            } else
+            }
+            else
             {
                 fieldsListOptions.AddRange(targetVis.GetDataFieldsListFromURL(guiVisSpecs["data"]["url"].Value));
             }

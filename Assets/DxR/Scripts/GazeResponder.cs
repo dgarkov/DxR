@@ -3,6 +3,7 @@
 
 // This example is built from HoloToolkit examples package.
 
+using Microsoft.MixedReality.Toolkit.Input;
 using UnityEngine;
 
 namespace DxR
@@ -11,7 +12,7 @@ namespace DxR
     /// This class implements IFocusable to respond to gaze changes.
     /// It highlights the object being gazed at.
     /// </summary>
-    public class GazeResponder : MonoBehaviour, HoloToolkit.Unity.InputModule.IFocusable
+    public class GazeResponder : MonoBehaviour, IMixedRealityFocusHandler
     {
         private Material[] defaultMaterials;
 
@@ -20,13 +21,23 @@ namespace DxR
             defaultMaterials = GetComponent<Renderer>().materials;
         }
 
+        void IMixedRealityFocusHandler.OnFocusEnter(FocusEventData eventData)
+        {
+            OnFocusEnter();
+        }
+
+        void IMixedRealityFocusHandler.OnFocusExit(FocusEventData eventData)
+        {
+            OnFocusExit();
+        }
+
         public void OnFocusEnter()
         {
             Mark mark = gameObject.GetComponent<Mark>();
-            if(mark != null)
+            if (mark != null)
             {
                 mark.OnFocusEnter();
-            } 
+            }
         }
 
         public void OnFocusExit()
@@ -40,7 +51,7 @@ namespace DxR
 
         private void OnDestroy()
         {
-            
+
         }
     }
 }

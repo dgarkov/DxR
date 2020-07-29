@@ -1,0 +1,9 @@
+D:\Projects\DxR\Assets\Dependencies\netstandard2.0\Microsoft.Windows.MixedReality.DotNetWinRT\Editor\Microsoft.Windows.MixedReality.DotNetWinRT.Editor.asmdef
+D:\Projects\DxR\Assets\Dependencies\netstandard2.0\Microsoft.Windows.MixedReality.DotNetWinRT\Editor\Microsoft.Windows.MixedReality.DotNetWinRT.Editor.asmdef.meta
+D:\Projects\DxR\Assets\Dependencies\netstandard2.0\Microsoft.Windows.MixedReality.DotNetWinRT\Editor\Microsoft.Windows.MixedReality.DotNetWinRT.Init.cs
+D:\Projects\DxR\Assets\Dependencies\netstandard2.0\Microsoft.Windows.MixedReality.DotNetWinRT\Editor\Microsoft.Windows.MixedReality.DotNetWinRT.Init.cs.meta
+D:\Projects\DxR\Assets\Dependencies\netstandard2.0\Microsoft.Windows.MixedReality.DotNetWinRT\x64\MonoSupport.dll
+D:\Projects\DxR\Assets\Dependencies\netstandard2.0\Microsoft.Windows.MixedReality.DotNetWinRT\x64\MonoSupport.dll.meta
+D:\Projects\DxR\Assets\Dependencies\netstandard2.0\Microsoft.Windows.MixedReality.DotNetWinRT.dll
+D:\Projects\DxR\Assets\Dependencies\netstandard2.0\System.Drawing.Primitives.dll
+D:\Projects\DxR\MSBuild\Output\obj\Dependencies\Release\netstandard2.0\DxR-Unity.Dependencies.msb4u.csproj.CopyComplete
