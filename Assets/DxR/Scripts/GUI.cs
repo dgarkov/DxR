@@ -1,14 +1,11 @@
 ﻿//#define USE_INTERACTION_GUI
 
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using SimpleJSON;
 using UnityEngine.UI;
 using System;
-using UnityEngine.EventSystems;
 using Microsoft.MixedReality.Toolkit.UI;
-using UnityEngine.Events;
 
 namespace DxR
 {
@@ -65,7 +62,7 @@ namespace DxR
                 OnMarkDropdownValueChanged(markDropdown);
             });
             Interactable markInteractable = marksDropdownTransform.GetComponent<Interactable>();
-            markInteractable.OnClick.AddListener(delegate { OnDropdownClick(markDropdown); });
+            markInteractable.OnClick.AddListener(delegate { OnDropdownClick(markDropdown); });            
 
             Interactable btn = gameObject.transform.Find("UpdateButton").GetComponent<Interactable>();
             btn.OnClick.AddListener(CallUpdateVisSpecsFromGUISpecs);
@@ -177,7 +174,13 @@ namespace DxR
                 foreach (var item in dropdown.GetComponentsInChildren<Toggle>())
                 {
                     int value = i++;
-                    item.gameObject.AddComponent<Interactable>().OnClick.AddListener(() =>
+                    Interactable itemInteractable = item.gameObject.AddComponent<Interactable>();
+                    itemInteractable.States = Resources.Load("GUI/MRTK2/DefaultInteractableStates") as States;
+                    InteractableProfileItem profile = new InteractableProfileItem();
+                    profile.Target = item.gameObject;
+                    profile.Themes.Add(Resources.Load("GUI/MRTK2/DefaultTheme") as Theme);
+                    itemInteractable.Profiles.Add(profile);
+                    itemInteractable.OnClick.AddListener(() =>
                     {
                         dropdown.value = value;
                         foreach (var _item in dropdown.GetComponentsInChildren<Toggle>())
@@ -185,6 +188,7 @@ namespace DxR
                         item.isOn = true;
                     });
                 }
+                SetupBasicScrollbar(dropdown.GetComponentInChildren<Scrollbar>());
             }
         }
 
@@ -608,14 +612,20 @@ namespace DxR
         {
             Transform deleteChannelObject = channelGUI.transform.Find("DeleteChannelButton");
             Interactable btn = deleteChannelObject.gameObject.GetComponent<Interactable>();
-            btn.OnClick.AddListener(DeleteParentOfClickedObjectCallback);
+            btn.OnClick.AddListener(delegate
+            {
+                DeleteParentOfClickedObjectCallback(btn.gameObject);
+            });
         }
 
         private void AddInteractionGUIDeleteCallback(ref GameObject interactionGUI)
         {
             Transform deleteInteractionObject = interactionGUI.transform.Find("DeleteInteractionButton");
             Interactable btn = deleteInteractionObject.gameObject.GetComponent<Interactable>();
-            btn.OnClick.AddListener(DeleteParentOfClickedObjectCallback);
+            btn.OnClick.AddListener(delegate
+            {
+                DeleteParentOfClickedObjectCallback(btn.gameObject);
+            });
         }
 
         private void AddChannelGUIChannelCallback(ref GameObject channelGUI)
@@ -685,11 +695,11 @@ namespace DxR
             dropdown.AddOptions(GetChannelDropdownOptions());
         }
 
-        private void DeleteParentOfClickedObjectCallback()
+        private void DeleteParentOfClickedObjectCallback(GameObject buttonGameObject)
         {
-            Debug.Log("Clicked " + EventSystem.current.currentSelectedGameObject.transform.parent.name);
+            Debug.Log("Clicked " + buttonGameObject.transform.parent.name);
             //
-            GameObject.Destroy(EventSystem.current.currentSelectedGameObject.transform.parent.gameObject);
+            GameObject.Destroy(buttonGameObject.transform.parent.gameObject);
         }
 
         public List<string> GetChannelDropdownOptions()
@@ -781,6 +791,30 @@ namespace DxR
             if (valueIndex > 0)
             {
                 markDropdown.value = valueIndex;
+            }
+        }
+
+        private void SetupBasicScrollbar(Scrollbar scrollbar)
+        {
+            foreach (var interactable in scrollbar.GetComponentsInChildren<Interactable>())
+            {
+                if (interactable.name == "Up")
+                {
+                    interactable.OnClick.AddListener(delegate
+                    {
+                        if (scrollbar.value > 0)
+                            scrollbar.value += 0.25f;
+                    });
+                }
+                else if (interactable.name == "Down")
+                {
+                    interactable.OnClick.AddListener(delegate
+                    {
+                        Debug.Log("Down");
+                        if (scrollbar.value < 1)
+                            scrollbar.value -= 0.25f;
+                    });
+                }
             }
         }
     }
