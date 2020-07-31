@@ -85,12 +85,6 @@ namespace DxR
 #endif
             InitInteractiveButtons();
             UpdateGUISpecsFromVisSpecs();
-
-            foreach (var scrollbar in FindObjectsOfType<Scrollbar>())
-            {
-                Debug.LogError("setting up " + scrollbar.name);
-                SetupBasicScrollbar(scrollbar);
-            }
         }
 
         private void InitInteractiveButtons()
@@ -196,8 +190,6 @@ namespace DxR
                         item.isOn = true;
                     });
                 }
-                // Set up scrollbar for newly instantiated dropdown GUI
-                SetupBasicScrollbar(dropdown.GetComponentInChildren<Scrollbar>());
             }
         }
 
@@ -800,31 +792,6 @@ namespace DxR
             if (valueIndex > 0)
             {
                 markDropdown.value = valueIndex;
-            }
-        }
-
-        private void SetupBasicScrollbar(Scrollbar scrollbar)
-        {
-            foreach (var interactable in scrollbar.GetComponentsInChildren<Interactable>())
-            {
-                if (interactable.name == "Up")
-                {
-                    interactable.OnClick.AddListener(delegate
-                    {
-                        Debug.LogWarning("Up");
-                        if (scrollbar.value >= 0)
-                            scrollbar.value += 0.25f;
-                    });
-                }
-                else if (interactable.name == "Down")
-                {
-                    interactable.OnClick.AddListener(delegate
-                    {
-                        Debug.LogWarning("Down");
-                        if (scrollbar.value <= 1)
-                            scrollbar.value -= 0.25f;
-                    });
-                }
             }
         }
     }
