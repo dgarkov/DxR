@@ -72,6 +72,8 @@ namespace DxR
             addChannelButtonTransform = gameObject.transform.Find("ChannelList/Viewport/ChannelListContent/AddChannelButton");
             Interactable addChannelBtn = addChannelButtonTransform.GetComponent<Interactable>();
             addChannelBtn.OnClick.AddListener(AddEmptyChannelGUICallback);
+            // Add same material manually, as the target is the text, since the button moves to the bottom of the viewport on focus
+            addChannelButtonTransform.GetComponent<Image>().material = Resources.Load("Materials/MRTK2/Default UI Material") as Material;
 
 #if USE_INTERACTION_GUI
             
@@ -83,6 +85,12 @@ namespace DxR
 #endif
             InitInteractiveButtons();
             UpdateGUISpecsFromVisSpecs();
+
+            foreach (var scrollbar in FindObjectsOfType<Scrollbar>())
+            {
+                Debug.LogError("setting up " + scrollbar.name);
+                SetupBasicScrollbar(scrollbar);
+            }
         }
 
         private void InitInteractiveButtons()
@@ -188,6 +196,7 @@ namespace DxR
                         item.isOn = true;
                     });
                 }
+                // Set up scrollbar for newly instantiated dropdown GUI
                 SetupBasicScrollbar(dropdown.GetComponentInChildren<Scrollbar>());
             }
         }
@@ -802,7 +811,8 @@ namespace DxR
                 {
                     interactable.OnClick.AddListener(delegate
                     {
-                        if (scrollbar.value > 0)
+                        Debug.LogWarning("Up");
+                        if (scrollbar.value >= 0)
                             scrollbar.value += 0.25f;
                     });
                 }
@@ -810,8 +820,8 @@ namespace DxR
                 {
                     interactable.OnClick.AddListener(delegate
                     {
-                        Debug.Log("Down");
-                        if (scrollbar.value < 1)
+                        Debug.LogWarning("Down");
+                        if (scrollbar.value <= 1)
                             scrollbar.value -= 0.25f;
                     });
                 }
