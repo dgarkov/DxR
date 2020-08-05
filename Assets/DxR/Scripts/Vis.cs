@@ -24,7 +24,7 @@ namespace DxR
         public static string UNDEFINED = "undefined";                   // Value used for undefined objects in the JSON vis specs.
         public static float SIZE_UNIT_SCALE_FACTOR = 1.0f / 1000.0f;    // Conversion factor to convert each Unity unit to 1 meter.
         public static float DEFAULT_VIS_DIMS = 500.0f;                  // Default dimensions of a visualization, if not specified.
-                
+
         JSONNode visSpecs;                                              // Vis specs that is synced w/ the inferred vis specs and vis.
         JSONNode visSpecsInferred;                                      // This is the inferred vis specs and is ultimately used for construction.
 
@@ -40,7 +40,7 @@ namespace DxR
         string markType;                                                // Type or name of mark used in vis.
         public Data data;                                               // Object containing data.
         bool IsLinked = false;                                          // Link to other vis object for interaction.
-        string data_name=null;
+        string data_name = null;
 
         public List<GameObject> markInstances;                                 // List of mark instances; each mark instance corresponds to a datum.
 
@@ -89,7 +89,7 @@ namespace DxR
             // Initialize the GUI based on the initial vis specs.
             InitGUI();
             InitTooltip();
-            
+
             // Update vis based on the vis specs.
             UpdateVis();
             isReady = true;
@@ -118,7 +118,7 @@ namespace DxR
         private void InitTooltip()
         {
             GameObject tooltipPrefab = Resources.Load("Tooltip/Tooltip") as GameObject;
-            if(tooltipPrefab != null)
+            if (tooltipPrefab != null)
             {
                 tooltip = Instantiate(tooltipPrefab, parentObject.transform);
                 tooltip.SetActive(false);
@@ -170,9 +170,9 @@ namespace DxR
 
             foreach (JSONObject interactionSpecs in specs["interaction"].AsArray)
             {
-                if(interactionSpecs["type"] != null && interactionSpecs["field"] != null && interactionSpecs["domain"] != null)
+                if (interactionSpecs["type"] != null && interactionSpecs["field"] != null && interactionSpecs["domain"] != null)
                 {
-                    switch(interactionSpecs["type"].Value)
+                    switch (interactionSpecs["type"].Value)
                     {
                         case "thresholdFilter":
                             AddThresholdFilterInteraction(interactionSpecs);
@@ -188,10 +188,11 @@ namespace DxR
 
                     Debug.Log("Constructed interaction: " + interactionSpecs["type"].Value +
                         " for data field " + interactionSpecs["field"].Value);
-                } else
+                }
+                else
                 {
                     Debug.Log("Make sure interaction object has type, field, and domain specs.");
-//                    throw new System.Exception("Make sure interaction object has type, field, and domain specs.");
+                    //                    throw new System.Exception("Make sure interaction object has type, field, and domain specs.");
                 }
 
             }
@@ -207,10 +208,10 @@ namespace DxR
 
         private void AddToggleFilterInteraction(JSONObject interactionSpecs)
         {
-            if(interactionsParentObject != null)
+            if (interactionsParentObject != null)
             {
                 interactionsParentObject.GetComponent<Interactions>().AddToggleFilter(interactionSpecs);
-            }            
+            }
         }
 
         private void ConstructLegends(JSONNode specs)
@@ -274,9 +275,9 @@ namespace DxR
             if (axisPrefab != null)
             {
                 channelEncoding.axis = Instantiate(axisPrefab, guidesParentObject.transform);
-                channelEncoding.axis.GetComponent<Axis>().Init(interactionsParentObject.GetComponent<Interactions>(), 
+                channelEncoding.axis.GetComponent<Axis>().Init(interactionsParentObject.GetComponent<Interactions>(),
                     channelEncoding.field);
-                channelEncoding.axis.GetComponent<Axis>().UpdateSpecs(axisSpecs, channelEncoding.scale);                
+                channelEncoding.axis.GetComponent<Axis>().UpdateSpecs(axisSpecs, channelEncoding.scale);
             }
             else
             {
@@ -287,22 +288,22 @@ namespace DxR
         private void ApplyChannelEncodings()
         {
             bool isDirectionChanged = false;
-            foreach(ChannelEncoding ch in channelEncodings)
+            foreach (ChannelEncoding ch in channelEncodings)
             {
                 ApplyChannelEncoding(ch, ref markInstances);
 
-                if(ch.channel == "xdirection" || ch.channel == "ydirection" || ch.channel == "zdirection")
+                if (ch.channel == "xdirection" || ch.channel == "ydirection" || ch.channel == "zdirection")
                 {
                     isDirectionChanged = true;
                 }
             }
 
-            if(isDirectionChanged)
+            if (isDirectionChanged)
             {
                 for (int i = 0; i < markInstances.Count; i++)
                 {
                     Mark markComponent = markInstances[i].GetComponent<Mark>();
-  
+
                     markComponent.SetRotation();
                 }
             }
@@ -311,7 +312,7 @@ namespace DxR
         private void ApplyChannelEncoding(ChannelEncoding channelEncoding,
             ref List<GameObject> markInstances)
         {
-            for(int i = 0; i < markInstances.Count; i++)
+            for (int i = 0; i < markInstances.Count; i++)
             {
                 Mark markComponent = markInstances[i].GetComponent<Mark>();
                 if (markComponent == null)
@@ -345,7 +346,7 @@ namespace DxR
                 markInstance.GetComponent<Mark>().datum = dataValue;
 
                 // Assign tooltip:
-                if(enableTooltip)
+                if (enableTooltip)
                 {
                     markInstance.GetComponent<Mark>().InitTooltip(ref tooltip);
                 }
@@ -390,7 +391,7 @@ namespace DxR
                     channelEncoding.field = channelSpecs["field"];
 
                     // Check validity of data field
-                    if(!data.fieldNames.Contains(channelEncoding.field))
+                    if (!data.fieldNames.Contains(channelEncoding.field))
                     {
                         throw new Exception("Cannot find data field " + channelEncoding.field + " in data. Please check your spelling (case sensitive).");
                     }
@@ -455,7 +456,7 @@ namespace DxR
             {
                 markPrefab.GetComponent<Mark>().Infer(data, visSpecs, out visSpecsInferred, visSpecsURL);
 
-                if(enableSpecsExpansion)
+                if (enableSpecsExpansion)
                 {
                     JSONNode visSpecsToWrite = JSON.Parse(visSpecsInferred.ToString());
                     if (visSpecs["data"]["url"] != null && visSpecs["data"]["url"] != "inline")
@@ -468,14 +469,14 @@ namespace DxR
                         visSpecsToWrite.Remove("interaction");
                     }
 #if UNITY_EDITOR
-            System.IO.File.WriteAllText(Parser.GetFullSpecsPath(visSpecsURL), visSpecsToWrite.ToString(2));
+                    System.IO.File.WriteAllText(Parser.GetFullSpecsPath(visSpecsURL), visSpecsToWrite.ToString(2));
 #else
 
                     UnityEngine.Windows.File.WriteAllBytes(Parser.GetFullSpecsPath(visSpecsURL),
                         System.Text.Encoding.UTF8.GetBytes(visSpecsToWrite.ToString(2)));
 #endif
 
-                    
+
                 }
             }
             else
@@ -521,12 +522,12 @@ namespace DxR
 
         private void UpdateVisData()
         {
-            if(visSpecs["data"]["url"] != "inline")
+            if (visSpecs["data"]["url"] != "inline")
             {
                 visSpecs["data"].Add("values", parser.CreateValuesSpecs(visSpecs["data"]["url"]));
                 data_name = visSpecs["data"]["url"];
             }
-            
+
             JSONNode valuesSpecs = visSpecs["data"]["values"];
 
             Debug.Log("Data update " + visSpecs["data"]["values"].ToString());
@@ -561,8 +562,12 @@ namespace DxR
                         Debug.Log("value null found: ");
                         break;
                     }
-                   
-                    d.Add(curFieldName, value[curFieldName]);
+                    var curValue = value[curFieldName];
+                    d.Add(curFieldName,
+                        // Use built-in Parser to avoid rounding errors for decimal numbers
+                        float.TryParse(curValue.Value, out float _)
+                        ? curValue.AsFloat.ToString()
+                        : curValue.Value);
                 }
 
                 if (!valueHasNullField)
@@ -627,7 +632,8 @@ namespace DxR
             {
                 visSpecs.Add("width", new JSONNumber(DEFAULT_VIS_DIMS));
                 width = visSpecs["width"].AsFloat;
-            } else
+            }
+            else
             {
                 width = visSpecs["width"].AsFloat;
             }
@@ -705,7 +711,7 @@ namespace DxR
             // TODO: Optimize this.
             if (guiSpecs["data"]["url"] != null)
             {
-                if(guiSpecs["data"]["url"] != "inline")
+                if (guiSpecs["data"]["url"] != "inline")
                 {
                     guiSpecs["data"].Remove("values");
                     visSpecs["data"].Remove("values");
@@ -726,13 +732,13 @@ namespace DxR
             foreach (KeyValuePair<string, JSONNode> kvp in visSpecs["encoding"].AsObject)
             {
                 string channelName = kvp.Key;
-                if(visSpecs["encoding"][channelName]["value"] == null && guiSpecs["encoding"][channelName] != null)
+                if (visSpecs["encoding"][channelName]["value"] == null && guiSpecs["encoding"][channelName] != null)
                 {
                     channelsToUpdate.Add(channelName);
                 }
             }
 
-            foreach(string channelName in channelsToUpdate)
+            foreach (string channelName in channelsToUpdate)
             {
                 visSpecs["encoding"][channelName]["field"] = guiSpecs["encoding"][channelName]["field"];
                 visSpecs["encoding"][channelName]["type"] = guiSpecs["encoding"][channelName]["type"];
@@ -759,7 +765,7 @@ namespace DxR
             {
                 string channelName = kvp.Key;
                 Debug.Log("Testing channel " + channelName);
-                
+
                 if (guiSpecs["encoding"][channelName]["value"] == null && visSpecs["encoding"][channelName] == null)
                 {
                     Debug.Log("Adding channel " + channelName);
@@ -771,11 +777,11 @@ namespace DxR
             // Go through vis specs and UPDATE fields and types of interactions
             // that are in the gui specs.
             List<string> fieldsToUpdate = new List<string>();
-            foreach(JSONObject interactionSpecs in visSpecs["interaction"].AsArray)
+            foreach (JSONObject interactionSpecs in visSpecs["interaction"].AsArray)
             {
                 string fieldName = interactionSpecs["field"];
                 // If the field is in gui, it needs update:
-                if(FieldIsInInteractionSpecs(guiSpecs["interaction"], fieldName))
+                if (FieldIsInInteractionSpecs(guiSpecs["interaction"], fieldName))
                 {
                     fieldsToUpdate.Add(fieldName);
                 }
@@ -784,7 +790,7 @@ namespace DxR
             // Do the update:
             foreach (string fieldName in fieldsToUpdate)
             {
-                visSpecs["interaction"][GetFieldIndexInInteractionSpecs(visSpecs["interaction"], fieldName)]["type"] = 
+                visSpecs["interaction"][GetFieldIndexInInteractionSpecs(visSpecs["interaction"], fieldName)]["type"] =
                     guiSpecs["interaction"][GetFieldIndexInInteractionSpecs(visSpecs["interaction"], fieldName)]["type"];
             }
 
@@ -840,7 +846,7 @@ namespace DxR
             foreach (JSONObject interactionObject in interactionSpecs.AsArray)
             {
                 string fieldName = interactionObject["field"];
-                if(fieldName == searchFieldName)
+                if (fieldName == searchFieldName)
                 {
                     return true;
                 }
@@ -872,7 +878,7 @@ namespace DxR
         {
             marksList = new List<string>();
             marksList.Add(DxR.Vis.UNDEFINED);
-            
+
             TextAsset marksListTextAsset = (TextAsset)Resources.Load("Marks/marks", typeof(TextAsset));
             if (marksListTextAsset != null)
             {
@@ -897,7 +903,7 @@ namespace DxR
             string[] dirs = Directory.GetFiles("Assets/DxR/Resources/Marks");
             for (int i = 0; i < dirs.Length; i++)
             {
-                if (Path.GetExtension(dirs[i]) != ".meta" && Path.GetExtension(dirs[i]) != ".json" 
+                if (Path.GetExtension(dirs[i]) != ".meta" && Path.GetExtension(dirs[i]) != ".json"
                     && !marksList.Contains(Path.GetFileName(dirs[i])))
                 {
                     marksList.Add(Path.GetFileName(dirs[i]));
@@ -936,12 +942,12 @@ namespace DxR
         public void UpdateTextSpecsFromVisSpecs()
         {
             JSONNode visSpecsToWrite = JSON.Parse(visSpecs.ToString());
-            if(visSpecs["data"]["url"] != null && visSpecs["data"]["url"] != "inline")
+            if (visSpecs["data"]["url"] != null && visSpecs["data"]["url"] != "inline")
             {
                 visSpecsToWrite["data"].Remove("values");
             }
 
-            if(visSpecs["interaction"].AsArray.Count == 0)
+            if (visSpecs["interaction"].AsArray.Count == 0)
             {
                 visSpecsToWrite.Remove("interaction");
             }
@@ -963,7 +969,7 @@ namespace DxR
 
         public void Rescale(float scaleFactor)
         {
-            viewParentObject.transform.localScale = Vector3.Scale(viewParentObject.transform.localScale, 
+            viewParentObject.transform.localScale = Vector3.Scale(viewParentObject.transform.localScale,
                 new Vector3(scaleFactor, scaleFactor, scaleFactor));
         }
 
@@ -976,8 +982,8 @@ namespace DxR
 
         public void RotateAroundCenter(Vector3 rotationAxis, float angleDegrees)
         {
-            Vector3 center = viewParentObject.transform.parent.transform.position + 
-                new Vector3(width * SIZE_UNIT_SCALE_FACTOR / 2.0f, height * SIZE_UNIT_SCALE_FACTOR / 2.0f, 
+            Vector3 center = viewParentObject.transform.parent.transform.position +
+                new Vector3(width * SIZE_UNIT_SCALE_FACTOR / 2.0f, height * SIZE_UNIT_SCALE_FACTOR / 2.0f,
                 depth * SIZE_UNIT_SCALE_FACTOR / 2.0f);
             viewParentObject.transform.RotateAround(center, rotationAxis, angleDegrees);
         }
@@ -985,11 +991,11 @@ namespace DxR
         // Update the visibility of each mark according to the filters results:
         internal void FiltersUpdated()
         {
-            if(interactionsParentObject != null)
+            if (interactionsParentObject != null)
             {
                 ShowAllMarks();
 
-                foreach (KeyValuePair<string,List<bool>> filterResult in interactionsParentObject.GetComponent<Interactions>().filterResults)
+                foreach (KeyValuePair<string, List<bool>> filterResult in interactionsParentObject.GetComponent<Interactions>().filterResults)
                 {
                     List<bool> visib = filterResult.Value;
                     for (int m = 0; m < markInstances.Count; m++)
